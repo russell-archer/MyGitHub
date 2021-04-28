@@ -15,6 +15,8 @@ import SwiftUI
 /// Use `authenticate(completion:)` to authenticate the user before attempting to use other methods to return private data.
 class GitHubApi: NSObject {
     
+    enum requestType { case profile, repos }
+    
     /// Authenticate the user on GitHub and obtain the access and refresh tokens required to use the GitHub API with delegated access.
     ///
     /// We use `ASWebAuthenticationSession` to pass our Client ID (which identifies this app), client secret and callback URL
@@ -72,120 +74,100 @@ class GitHubApi: NSObject {
     }
     
     /// Gets the currently authenticated user's GitHub profile.
-    /// - Parameter completion: A closure that will receive the result. If successful, the result will contain the user's profile.
-    /// See GitHub documentation:
+    /// - Parameters:
+    ///   - userAuthentication: An `Authentication` object that includes a GitHub access token.
+    ///   - completion: A closure that will be called when the process is complete. The `Result` will be returned on the main thread.
+    ///   If successful, the `Result` will contain the user's profile.
     func userProfile(userAuthentication: Authentication, completion: @escaping (Result<User, ApiError>) -> Void) {
 
-        guard let authenticatedUserUrl = buildRequestUserProfileUrl() else {
-            completion(.failure(.badParams))
-            return
-        }
-        
-        // The request URL will be the form:
-        // https://api.github.com/user
-        var request = URLRequest(url: authenticatedUserUrl)
-        request.httpMethod = Strings.httpGetMethodName
-        
-        // Get the cached access token (if it exists)
-        if let accessToken = userAuthentication.accessToken {
-            request.setValue("\(Strings.accessTokenRequestName) \(accessToken)", forHTTPHeaderField: Strings.authorizationHeaderName)
-        } else {
-            completion(.failure(.userNotAuthenticated))
-            return
-        }
-        
-        let task = URLSession.shared.dataTask(with: request) { json, response, error in
-            
-            guard json != nil else {
-                DispatchQueue.main.async { completion(.failure(.noData)) }
-                return
-            }
-            
-            // Check the response from the server (200 == OK)
-            let httpResponse = response as! HTTPURLResponse
-            guard httpResponse.statusCode == 200 else {
-                DispatchQueue.main.async { completion(.failure(.badResponse)) }
-                return
-            }
-            
-            guard error == nil else {
-                DispatchQueue.main.async { completion(.failure(.badResponse)) }
-                return
-            }
-            
-            let decoder = JSONDecoder()
-            decoder.keyDecodingStrategy = .convertFromSnakeCase
-            guard let profile = try? decoder.decode(User.self, from: json!) else {
-                DispatchQueue.main.async { completion(.failure(.cantDecode)) }
-                return
-            }
-                        
-            // We got the user profile back from GitHub. Ref: https://docs.github.com/en/rest/reference/users
-            DispatchQueue.main.async { completion(.success(profile)) }
-        }
-        
-        task.resume()
+        processRequest(type: .profile, userAuthentication: userAuthentication, completion: completion)
     }
     
-    /// TODO
-    /// See GitHub documentation:  https://docs.github.com/en/rest/reference/repos#list-repositories-for-the-authenticated-user
+    /// Get a list of the authenticated user's repos.
     /// - Parameters:
-    ///   - userAuthentication: todo
-    ///   - completion: todo
+    ///   - userAuthentication: An `Authentication` object that includes a GitHub access token.
+    ///   - completion: A closure that will be called when the process is complete. The `Result` will be returned on the main thread.
+    ///   If successful, the `Result` will contain the user's repos.
     func repos(userAuthentication: Authentication, completion: @escaping (Result<[Repository], ApiError>) -> Void) {
         
-        guard let reposUrl = buildRequestReposUrl(page: 1) else {
-            completion(.failure(.badParams))
-            return
-        }
-        
-        // The request URL will be the form:
-        // https://api.github.com/user/repos?visibility=all&per_page=100&page=1
-        var request = URLRequest(url: reposUrl)
-        request.httpMethod = Strings.httpGetMethodName
-        
-        // Get the cached access token (if it exists)
-        if let accessToken = userAuthentication.accessToken {
-            request.setValue("\(Strings.accessTokenRequestName) \(accessToken)", forHTTPHeaderField: Strings.authorizationHeaderName)
-        } else {
-            completion(.failure(.userNotAuthenticated))
-            return
-        }
-        
-        let task = URLSession.shared.dataTask(with: request) { json, response, error in
-            
-            guard json != nil else {
-                DispatchQueue.main.async { completion(.failure(.noData)) }
-                return
-            }
-            
-            // Check the response from the server (200 == OK)
-            let httpResponse = response as! HTTPURLResponse
-            guard httpResponse.statusCode == 200 else {
-                DispatchQueue.main.async { completion(.failure(.badResponse)) }
-                return
-            }
-            
-            guard error == nil else {
-                DispatchQueue.main.async { completion(.failure(.badResponse)) }
-                return
-            }
-            
-            let decoder = JSONDecoder()
-            decoder.keyDecodingStrategy = .convertFromSnakeCase
-            guard let repos = try? decoder.decode([Repository].self, from: json!) else {
-                DispatchQueue.main.async { completion(.failure(.cantDecode)) }
-                return
-            }
-                        
-            // We got the list of the user's repos back from GitHub.
-            DispatchQueue.main.async { completion(.success(repos)) }
-        }
-        
-        task.resume()
+        processRequest(type: .repos, userAuthentication: userAuthentication, completion: completion)
     }
     
     // MARK:- Private methods
+    
+    /// Request data via the GitHub API and decode the JSON data result.
+    /// - Parameters:
+    ///   - type: The type of request (e.g. get user profile data or list or repos).
+    ///   - userAuthentication: An `Authentication` object that includes a GitHub access token.
+    ///   - completion: A closure that will be called when the process is complete. The `Result` will be returned on the main thread.
+    private func processRequest<T: Decodable>(type: requestType, userAuthentication: Authentication, completion: @escaping (Result<T, ApiError>) -> Void) {
+
+        var requestUrl: URL?
+        var decodeType: T.Type
+        
+        switch type {
+            case .profile:
+                decodeType = User.self as! T.Type
+                requestUrl = buildRequestUserProfileUrl()
+                
+            case .repos:
+                decodeType = [Repository].self as! T.Type
+                requestUrl = buildRequestReposUrl(page: 1)
+        }
+        
+        guard let url = requestUrl else {
+            completion(.failure(.badParams))
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = Strings.httpGetMethodName
+        
+        // Get the cached access token (if it exists) and add it as an HTTP header
+        if let accessToken = userAuthentication.accessToken {
+            request.setValue("\(Strings.accessTokenRequestName) \(accessToken)", forHTTPHeaderField: Strings.authorizationHeaderName)
+        } else {
+            completion(.failure(.userNotAuthenticated))
+            return
+        }
+        
+        // Make the request for data
+        let task = URLSession.shared.dataTask(with: request) { json, response, error in
+            
+            // Was any data returned?
+            guard json != nil else {
+                DispatchQueue.main.async { completion(.failure(.noData)) }
+                return
+            }
+            
+            // Check the response from the server (200 == OK)
+            let httpResponse = response as! HTTPURLResponse
+            guard httpResponse.statusCode == 200 else {
+                DispatchQueue.main.async { completion(.failure(.badResponse)) }
+                return
+            }
+            
+            // Did GitHub report an error
+            guard error == nil else {
+                print("GitHub reports an error: \(error!.localizedDescription)")
+                DispatchQueue.main.async { completion(.failure(.badResponse)) }
+                return
+            }
+            
+            // Decode the data from JSON into the appropriate type
+            let decoder = JSONDecoder()
+            decoder.keyDecodingStrategy = .convertFromSnakeCase
+            guard let profile = try? decoder.decode(decodeType, from: json!) else {
+                DispatchQueue.main.async { completion(.failure(.cantDecode)) }
+                return
+            }
+                        
+            // We got the data back from GitHub and successfully decoded it
+            DispatchQueue.main.async { completion(.success(profile)) }
+        }
+        
+        task.resume()  // Start the request task
+    }
     
     /// Extract the GitHub authentication code from a URL.
     /// - Parameter callbackUrl: The URL that contains the authentication code.
