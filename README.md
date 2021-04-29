@@ -2,6 +2,8 @@
 
 A simple SwiftUI app that uses OAuth2 to authenticate a user on GitHub and allows viewing of the user's repos and profile.
 
+![](./readme-assets/OAuthGitHubApp8.gif)
+
 # References
 
 https://docs.github.com/en/rest

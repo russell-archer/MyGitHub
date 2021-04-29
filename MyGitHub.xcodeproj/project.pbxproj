@@ -28,6 +28,7 @@
 		685D2D94263736F5001BAEDF /* OAuthGitHubApp4.png in Resources */ = {isa = PBXBuildFile; fileRef = 685D2D8C263736F5001BAEDF /* OAuthGitHubApp4.png */; };
 		685D2D95263736F5001BAEDF /* OAuthGitHubApp5.png in Resources */ = {isa = PBXBuildFile; fileRef = 685D2D8D263736F5001BAEDF /* OAuthGitHubApp5.png */; };
 		685D2D96263736F5001BAEDF /* OAuthGitHubApp0.png in Resources */ = {isa = PBXBuildFile; fileRef = 685D2D8E263736F5001BAEDF /* OAuthGitHubApp0.png */; };
+		6861252E263AE9CE00E47EF4 /* OAuthGitHubApp8.gif in Resources */ = {isa = PBXBuildFile; fileRef = 6861252D263AE9CE00E47EF4 /* OAuthGitHubApp8.gif */; };
 		6861B6C92634763D000D5187 /* ReposView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6861B6C82634763D000D5187 /* ReposView.swift */; };
 		6868476C263233EC00EF3DB2 /* ProfileImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6868476B263233EC00EF3DB2 /* ProfileImageView.swift */; };
 		687B87A52631D5C200624C3D /* ImageLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 687B87A42631D5C200624C3D /* ImageLoader.swift */; };
@@ -63,6 +64,7 @@
 		685D2D8C263736F5001BAEDF /* OAuthGitHubApp4.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = OAuthGitHubApp4.png; sourceTree = "<group>"; };
 		685D2D8D263736F5001BAEDF /* OAuthGitHubApp5.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = OAuthGitHubApp5.png; sourceTree = "<group>"; };
 		685D2D8E263736F5001BAEDF /* OAuthGitHubApp0.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = OAuthGitHubApp0.png; sourceTree = "<group>"; };
+		6861252D263AE9CE00E47EF4 /* OAuthGitHubApp8.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = OAuthGitHubApp8.gif; sourceTree = "<group>"; };
 		6861B6C82634763D000D5187 /* ReposView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReposView.swift; sourceTree = "<group>"; };
 		6868476B263233EC00EF3DB2 /* ProfileImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileImageView.swift; sourceTree = "<group>"; };
 		687B87A42631D5C200624C3D /* ImageLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageLoader.swift; sourceTree = "<group>"; };
@@ -198,6 +200,7 @@
 				685D2D8D263736F5001BAEDF /* OAuthGitHubApp5.png */,
 				685D2D89263736F5001BAEDF /* OAuthGitHubApp6.png */,
 				685D2D8A263736F5001BAEDF /* OAuthGitHubApp7.png */,
+				6861252D263AE9CE00E47EF4 /* OAuthGitHubApp8.gif */,
 			);
 			path = "readme-assets";
 			sourceTree = "<group>";
@@ -265,6 +268,7 @@
 				685D2D92263736F5001BAEDF /* OAuthGitHubApp7.png in Resources */,
 				685D2D93263736F5001BAEDF /* OAuthGitHubApp3.png in Resources */,
 				6808394F262110150028541F /* Preview Assets.xcassets in Resources */,
+				6861252E263AE9CE00E47EF4 /* OAuthGitHubApp8.gif in Resources */,
 				6808394C262110150028541F /* Assets.xcassets in Resources */,
 				685D2D96263736F5001BAEDF /* OAuthGitHubApp0.png in Resources */,
 				685D2D8F263736F5001BAEDF /* OAuthGitHubApp2.png in Resources */,
