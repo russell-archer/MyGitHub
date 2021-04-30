@@ -27,10 +27,13 @@ class GitHubApi: NSObject {
     /// this app to use GitHub API methods with "delegated access" (i.e. as if it were the authenticated user).
     /// - Parameter completion: A closure that takes a `Result<Authentication, ApiError>`. If successfully authenticated the
     /// the result will contain an `Authentication` with an access token that may be included with API calls to authorize access.
-    /// See GitHub documentation: https://docs.github.com/en/developers/apps/authorizing-oauth-apps
+    ///
+    /// Refer to the following GitHub documentation:
+    /// * https://docs.github.com/en/developers/apps/authorizing-oauth-apps
+    /// * https://docs.github.com/en/developers/apps/scopes-for-oauth-apps
     func authenticate(completion: @escaping (Result<Authentication, ApiError>) -> Void) {
         
-        guard let authenticateUserUrl = buildRequestAuthenticationCodeUrl() else {
+        guard let authenticateUserUrl = buildRequestAuthenticationCodeUrl(scope: .privateRepos) else {
             completion(.failure(.badParams))
             return
         }
